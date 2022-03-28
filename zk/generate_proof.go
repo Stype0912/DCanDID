@@ -1,4 +1,4 @@
-package main
+package zk
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/hash/mimc"
 	"math/big"
+	"math/rand"
+	"time"
 )
 
 type Circuit struct {
@@ -32,20 +34,23 @@ func mimcHash(data []byte, seed *big.Int) string {
 	return hashInt.String()
 }
 
-func main() {
-	preImage := []byte{0x01, 0x02, 0x03}
-	hash := mimcHash(preImage, big.NewInt(2))
+type Com struct {
+	Proof         groth16.Proof        `json:"proof"`
+	PublicWitness *Circuit             `json:"public_witness"`
+	VerifyingKey  groth16.VerifyingKey `json:"verifying_key"`
+}
 
-	fmt.Printf("hash: %s\n", hash)
-
+func Commitment(id string) (commitment Com) {
+	preImage := []byte(id)
+	seed := new(big.Int).Rand(rand.New(rand.NewSource(time.Now().UnixNano())), big.NewInt(100000000))
+	hash := mimcHash(preImage, seed)
 	var circuit Circuit
-	circuit.Seed = big.NewInt(2)
+	circuit.Seed = seed
 	r1cs, err := frontend.Compile(ecc.BN254, backend.GROTH16, &circuit)
 	if err != nil {
 		fmt.Printf("Compile failed : %v\n", err)
 		return
 	}
-
 	pk, vk, err := groth16.Setup(r1cs)
 	if err != nil {
 		fmt.Printf("Setup failed\n")
@@ -65,11 +70,20 @@ func main() {
 	publicWitness := &Circuit{
 		Hash: frontend.Value(hash),
 	}
+	commitment.VerifyingKey = vk
+	commitment.PublicWitness = publicWitness
+	commitment.Proof = proof
+	//commitmentByte, _ := json.Marshal(commitment)
+	//fmt.Println(string(commitmentByte))
+	return
+}
 
-	err = groth16.Verify(proof, vk, publicWitness)
+func CommitmentVerify(commitment Com) bool {
+	err := groth16.Verify(commitment.Proof, commitment.VerifyingKey, commitment.PublicWitness)
 	if err != nil {
 		fmt.Printf("verification failed: %v\n", err)
-		return
+		return false
 	}
 	fmt.Printf("verification succeded\n")
+	return true
 }
