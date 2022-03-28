@@ -18,19 +18,19 @@ type UserOriginInfo struct {
 	Id string `json:"id"`
 }
 
-type Claim []struct {
+type ClaimStruct []struct {
 	Attr       string `json:"attr"`
 	Commitment string `json:"commitment"`
 	Provider   string `json:"provider"`
 }
 
 type ClaimResp struct {
-	StatusCode int64  `json:"status_code"`
-	Message    string `json:"message"`
-	Claim      Claim  `json:"claim"`
-	Id         string `json:"id"`
-	Witness    string `json:"witness"`
-	IsNew      bool   `json:"is_new"`
+	StatusCode int64       `json:"status_code"`
+	Message    string      `json:"message"`
+	Claim      ClaimStruct `json:"claim"`
+	Id         string      `json:"id"`
+	Witness    string      `json:"witness"`
+	IsNew      bool        `json:"is_new"`
 }
 
 type Witness struct {
@@ -39,6 +39,7 @@ type Witness struct {
 }
 
 func OracleGetCommit(w http.ResponseWriter, request *http.Request) {
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
@@ -46,6 +47,10 @@ func OracleGetCommit(w http.ResponseWriter, request *http.Request) {
 
 	var userInfo UserOriginInfo
 	var responseInfo ClaimResp
+
+	defer func() {
+		json.NewEncoder(w).Encode(responseInfo)
+	}()
 
 	_ = decoder.Decode(&userInfo)
 
@@ -60,7 +65,7 @@ func OracleGetCommit(w http.ResponseWriter, request *http.Request) {
 	var isClaimed bool
 	_ = db.QueryRow("SELECT claim, is_claimed, witness FROM user_information WHERE user_id = ?", userInfo.Id).Scan(&claim, &isClaimed, &witness)
 
-	var claimStruct Claim
+	var claimStruct ClaimStruct
 	var witnessStruct Witness
 	if isClaimed {
 		err = json.Unmarshal([]byte(claim), &claimStruct)
@@ -104,7 +109,7 @@ func OracleGetCommit(w http.ResponseWriter, request *http.Request) {
 		}
 
 		responseInfo.Id = userInfo.Id
-		responseInfo.Claim = Claim{
+		responseInfo.Claim = ClaimStruct{
 			{
 				Attr:       "id",
 				Commitment: proof,
@@ -122,77 +127,72 @@ func OracleGetCommit(w http.ResponseWriter, request *http.Request) {
 		}
 
 	}
-	defer func() {
-		json.NewEncoder(w).Encode(responseInfo)
-	}()
 }
 
 type VerifyResp struct {
 	IsValid bool `json:"is_valid"`
 }
 
+type VerifyRequest struct {
+	Claim   ClaimStruct `json:"claim"`
+	Witness string      `json:"witness"`
+}
+
 func CommitmentVerify(w http.ResponseWriter, request *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	decoder := json.NewDecoder(request.Body)
 
-	var userInfo UserOriginInfo
+	var requestInfo VerifyRequest
 	var responseInfo VerifyResp
 
-	_ = decoder.Decode(&userInfo)
-
-	db, _ := sql.Open("mysql", "root:tang2000912@tcp(127.0.0.1:3306)/user_information?charset=utf8")
-
-	var err error
-	var witness string
-	var claim string
-	var isClaimed bool
-	_ = db.QueryRow("SELECT claim, is_claimed, witness FROM user_information WHERE user_id = ?", userInfo.Id).Scan(&claim, &isClaimed, &witness)
-
-	var claimStruct Claim
-	var witnessStruct Witness
-	if isClaimed {
-		// claim以序列化的结构体存储，直接unmarshal即可
-		err = json.Unmarshal([]byte(claim), &claimStruct)
-		e, _ := hex.DecodeString(claimStruct[0].Commitment)
-		proof := groth16.NewProof(ecc.BN254)
-		_, err = proof.ReadFrom(bytes.NewReader(bytes.NewBuffer(e).Bytes()))
-		if err != nil {
-			return
-		}
-
-		// witness以hex存储，先解密，再反序列化
-		witnessByte, _ := hex.DecodeString(witness)
-		err = json.Unmarshal(witnessByte, &witnessStruct)
-		if err != nil {
-			return
-		}
-
-		// vk以hex格式存储，先解密，再读
-		vk := groth16.NewVerifyingKey(ecc.BN254)
-		f, _ := hex.DecodeString(witnessStruct.VerifyingKey)
-		_, err = vk.ReadFrom(bytes.NewReader(bytes.NewBuffer(f).Bytes()))
-		if err != nil {
-			return
-		}
-
-		// pk以序列化结构体存储，直接反序列化
-		var pk *zk.Circuit
-		err = json.Unmarshal([]byte(witnessStruct.PublicWitness), &pk)
-		if err != nil {
-			return
-		}
-		commitment := zk.Com{
-			Proof:         proof,
-			PublicWitness: pk,
-			VerifyingKey:  vk,
-		}
-		responseInfo.IsValid = zk.CommitmentVerify(commitment)
-	}
 	defer func() {
 		json.NewEncoder(w).Encode(responseInfo)
 	}()
+
+	decoder := json.NewDecoder(request.Body)
+	_ = decoder.Decode(&requestInfo)
+
+	var claimStruct ClaimStruct
+	var witnessStruct Witness
+	var err error
+
+	claimStruct = requestInfo.Claim
+	e, _ := hex.DecodeString(claimStruct[0].Commitment)
+	proof := groth16.NewProof(ecc.BN254)
+	_, err = proof.ReadFrom(bytes.NewReader(bytes.NewBuffer(e).Bytes()))
+	if err != nil {
+		return
+	}
+
+	witness := requestInfo.Witness
+	// witness以hex存储，先解密，再反序列化
+	witnessByte, _ := hex.DecodeString(witness)
+	err = json.Unmarshal(witnessByte, &witnessStruct)
+	if err != nil {
+		return
+	}
+
+	// vk以hex格式存储，先解密，再读
+	vk := groth16.NewVerifyingKey(ecc.BN254)
+	f, _ := hex.DecodeString(witnessStruct.VerifyingKey)
+	_, err = vk.ReadFrom(bytes.NewReader(bytes.NewBuffer(f).Bytes()))
+	if err != nil {
+		return
+	}
+
+	// pk以序列化结构体存储，直接反序列化
+	var pk *zk.Circuit
+	err = json.Unmarshal([]byte(witnessStruct.PublicWitness), &pk)
+	if err != nil {
+		return
+	}
+	commitment := zk.Com{
+		Proof:         proof,
+		PublicWitness: pk,
+		VerifyingKey:  vk,
+	}
+	responseInfo.IsValid = zk.CommitmentVerify(commitment)
 }
 
 func main() {
