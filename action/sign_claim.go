@@ -41,7 +41,7 @@ func SignClaim(w http.ResponseWriter, request *http.Request) {
 		Witness: requestInfo.Witness,
 	}
 	commitVerifyResq := VerifyResp{}
-	err = util.DoHttpGetRequest("http://127.0.0.1:7890/check", commitVerifyReq, &commitVerifyResq)
+	err = util.DoHttpGetRequest("http://127.0.0.1:7890/check-claim", commitVerifyReq, &commitVerifyResq)
 	if err != nil || !commitVerifyResq.IsValid {
 		responseInfo.IsValid = false
 		return
