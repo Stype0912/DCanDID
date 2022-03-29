@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"github.com/Stype0912/DCanDID/zk"
+	"k8s.io/klog"
 	"net/http"
 	"time"
 )
@@ -119,7 +119,7 @@ func OracleGetCommit(w http.ResponseWriter, request *http.Request) {
 		_, err = db.Exec("INSERT INTO user_information (user_id, claim, is_claimed, witness, submission_date) VALUES (?, ?, ?, ?, ?)",
 			userInfo.Id, claimStr, true, witnessStr, time.Now().Format("2006-01-02 15:04:05"))
 		if err != nil {
-			fmt.Println(err)
+			klog.Error(err)
 			return
 		}
 

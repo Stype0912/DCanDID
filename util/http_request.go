@@ -15,6 +15,6 @@ func DoHttpGetRequest(url string, req interface{}, resp interface{}) (err error)
 	response, err := client.Do(request)
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
-	json.Unmarshal(body, resp)
+	err = json.Unmarshal(body, resp)
 	return
 }

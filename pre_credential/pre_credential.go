@@ -3,10 +3,10 @@ package pre_credential
 import (
 	crand "crypto/rand"
 	"crypto/rsa"
-	"fmt"
 	"github.com/Stype0912/DCanDID/common"
 	"github.com/Stype0912/DCanDID/util/commitment"
 	"github.com/Stype0912/DCanDID/util/threshold_signature"
+	"k8s.io/klog"
 	"math/big"
 	"math/rand"
 	"time"
@@ -16,7 +16,7 @@ func init() {
 	var err error
 	common.Sk, err = rsa.GenerateKey(crand.Reader, 1024)
 	if err != nil {
-		fmt.Println(err)
+		klog.Error(err)
 		return
 	}
 	common.Pk = &common.Sk.PublicKey

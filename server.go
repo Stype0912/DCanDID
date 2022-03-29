@@ -8,7 +8,10 @@ import (
 
 func main() {
 	http.HandleFunc("/signin", action.OracleGetCommit)
-	http.HandleFunc("/check", action.CommitmentVerify)
+	http.HandleFunc("/check-claim", action.CommitmentVerify)
 	http.HandleFunc("/sign", action.SignClaim)
+	http.HandleFunc("/send", action.CombineSignature)
+	http.HandleFunc("/generate-master", action.GenerateMaster)
+	http.HandleFunc("/dedup", action.SignM)
 	_ = http.ListenAndServe(":7890", nil)
 }
