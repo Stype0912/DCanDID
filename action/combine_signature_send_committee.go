@@ -115,7 +115,11 @@ func GenerateMaster(w http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		return
 	}
-	v_hat, rawData := dedup.DeduplicationUser(big.NewInt(320282200009128411))
+	userId, ok := new(big.Int).SetString(requestInfo.Id, 10)
+	if !ok {
+		return
+	}
+	v_hat, rawData := dedup.DeduplicationUser(userId)
 	var rawDataDeep []string
 	rawDataDeep = append(rawDataDeep, rawData...)
 
