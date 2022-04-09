@@ -4,6 +4,7 @@ import (
 	"github.com/Stype0912/DCanDID/common"
 	"github.com/Stype0912/DCanDID/util"
 	"github.com/Stype0912/DCanDID/util/mpc"
+	"k8s.io/klog"
 	"math/big"
 )
 
@@ -20,6 +21,7 @@ func DeduplicationUser(vReal *big.Int) (*big.Int, []string) {
 		bSum = new(big.Int).Add(bSum, new(big.Int).Mul(lambda[i], b[i]))
 	}
 	v_hat := new(big.Int).Add(bSum, vReal)
+	klog.Info(v_hat.String())
 	for i := int64(0); i < N; i++ {
 		tmp1 := new(big.Int).Mul(big.NewInt(N), lambda[i])
 		tmp2 := util.Inverse(new(big.Int).Mod(tmp1, p), p)

@@ -1,0 +1,18 @@
+{
+  "issuer": "did:dcandid:committee1",
+  "context": "Age is over 18",
+  "masterCredential": {},
+  "credentialSubject": {
+    "id": "did:dcandid:user1",
+    "birthday": {
+      "value": "Commitment to birthday",
+      "provider": "gov.cn"
+    },
+    "proof": {
+      "birthday": "zk of birthday is true",
+      "context":"zk of age is over 18"
+    },
+    "deduplicationOver": "china-id",
+  },
+  "signature": "signature of master credential"
+}
