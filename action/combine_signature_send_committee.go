@@ -3,6 +3,7 @@ package action
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	dedup "github.com/Stype0912/DCanDID/deduplication"
 	"github.com/Stype0912/DCanDID/util"
 	"github.com/Stype0912/DCanDID/util/threshold_signature"
@@ -53,7 +54,7 @@ func CombineSignature(w http.ResponseWriter, request *http.Request) {
 	err = util.DoHttpGetRequest("http://127.0.0.1:7890/sign", signReq, &signResp)
 	klog.Info(signResp)
 
-	marshalledReq, err := json.Marshal(requestInfo)
+	marshalledReq, err := json.Marshal(signReq)
 	if err != nil {
 		return
 	}
@@ -62,6 +63,7 @@ func CombineSignature(w http.ResponseWriter, request *http.Request) {
 
 	responseInfo.PkU = string(pubByte)
 	responseInfo.Claim = claimResp.Claim
+	klog.Info(fmt.Printf("to be signed:%v", toBeSigned))
 	responseInfo.CombinedSignature = threshold_signature.Combine(toBeSignedBig, signResp.Signature)
 	return
 }

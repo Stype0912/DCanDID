@@ -1,0 +1,21 @@
+{
+  "issuer": "did:dcandid:committee1",
+  "content": "Master",
+  "credentialSubjext": {
+    "id": "did:dcandid:user1",
+    "china-id": {
+      "value": "Commitment to China-id",
+      "provider": "gov.cn"
+    },
+    "birthday": {
+      "value": "Commitment to birthday",
+      "provider": "gov.cn"
+    },
+    "deduplicationOver": "china-id",
+    "proof": {
+      "china-id": "zk of commitment to china-id",
+      "birthday": "zk of commitment to birthday"
+    }
+  },
+  "signature": "signature of above"
+}

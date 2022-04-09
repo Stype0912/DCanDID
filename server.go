@@ -13,5 +13,6 @@ func main() {
 	http.HandleFunc("/send", action.CombineSignature)
 	http.HandleFunc("/generate-master", action.GenerateMaster)
 	http.HandleFunc("/dedup", action.SignM)
+	http.HandleFunc("/commit-sign-verify", action.CommitSignVerify)
 	_ = http.ListenAndServe(":7890", nil)
 }
