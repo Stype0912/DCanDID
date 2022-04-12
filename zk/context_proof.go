@@ -34,9 +34,8 @@ type CtxCom struct {
 	VerifyingKey  groth16.VerifyingKey `json:"verifying_key"`
 }
 
-func CtxCommitment(id string) (commitment CtxCom) {
+func CtxCommitment(id, age string) (commitment CtxCom) {
 	preImage := []byte(id)
-	age := "20"
 	seed := new(big.Int).Rand(rand.New(rand.NewSource(time.Now().UnixNano())), big.NewInt(100000000))
 	hash := mimcHash(preImage, seed)
 	var circuit ContextCircuit
