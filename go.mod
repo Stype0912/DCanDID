@@ -8,6 +8,9 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/ing-bank/zkrp v0.0.0-20211018091920-bc4eff1b3466
 	k8s.io/klog v1.0.0
+)
+
+require (
 	github.com/ethereum/go-ethereum v1.9.10 // indirect
 	github.com/fxamacker/cbor/v2 v2.2.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect

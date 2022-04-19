@@ -3,6 +3,7 @@ package credential_issue
 import (
 	"encoding/json"
 	"github.com/Stype0912/DCanDID/common"
+	"github.com/Stype0912/DCanDID/handler/committee"
 	"github.com/Stype0912/DCanDID/util/threshold_signature"
 	"math/big"
 )
@@ -28,7 +29,7 @@ func (c *Credential) MasterCredentialIssue(pc common.PreCredential) {
 	}
 	mByte, _ := json.Marshal(m)
 	//mStr := string(mByte)
-	sigma := threshold_signature.Sign(new(big.Int).SetBytes(mByte))
+	sigma := committee.Sign(new(big.Int).SetBytes(mByte))
 	signature := threshold_signature.Combine(new(big.Int).SetBytes(mByte), sigma)
 	c.Content = m
 	c.Signature = signature.String()

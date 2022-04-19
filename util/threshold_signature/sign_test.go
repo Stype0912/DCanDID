@@ -28,7 +28,7 @@ func TestSign(t *testing.T) {
 	//	t.FailNow()
 	//}
 	x, _ := new(big.Int).SetString(fmt.Sprintf("%x", sha256.Sum256([]byte("320282200009128411"))), 16)
-	X := Sign(x)
+	X := Sign(x, 1)
 	y := Combine(x, X)
 	t.Log(Verify(x, y))
 }

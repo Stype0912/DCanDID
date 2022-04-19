@@ -4,6 +4,7 @@ import (
 	crand "crypto/rand"
 	"crypto/rsa"
 	"github.com/Stype0912/DCanDID/common"
+	"github.com/Stype0912/DCanDID/handler/committee"
 	"github.com/Stype0912/DCanDID/util/commitment"
 	"github.com/Stype0912/DCanDID/util/threshold_signature"
 	"k8s.io/klog"
@@ -35,7 +36,7 @@ func PreCredentialGen() common.PreCredential {
 	PC := common.PreCredential{
 		Claim:    claim,
 		PkU:      common.Pk,
-		PiOracle: threshold_signature.Combine(claim.Cv, threshold_signature.Sign(claim.Cv)),
+		PiOracle: threshold_signature.Combine(claim.Cv, committee.Sign(claim.Cv)),
 	}
 	return PC
 	//fmt.Printf("%V", PC)
