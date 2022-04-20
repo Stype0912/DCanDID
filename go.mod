@@ -6,12 +6,10 @@ require (
 	github.com/consensys/gnark v0.5.2
 	github.com/consensys/gnark-crypto v0.5.3
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/ing-bank/zkrp v0.0.0-20211018091920-bc4eff1b3466
 	k8s.io/klog v1.0.0
 )
 
 require (
-	github.com/ethereum/go-ethereum v1.9.10 // indirect
 	github.com/fxamacker/cbor/v2 v2.2.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 // indirect

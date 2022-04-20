@@ -37,7 +37,7 @@ func TestMasterCred(t *testing.T) {
 				signature[i] = c.SignClaim(u)
 				//t.Log(c.SignClaim(u))
 			}
-			time.Sleep(800 * time.Millisecond)
+			time.Sleep(2000 * time.Millisecond)
 			pc := u.PCSignatureCombine(signature)
 			t.Log(pc)
 			t.Log(c.PCVerify(u, pc.Pi))
@@ -47,7 +47,7 @@ func TestMasterCred(t *testing.T) {
 				c.Init(i)
 				signature1[i] = c.MasterCredIssue(u, pc)
 			}
-			time.Sleep(200 * time.Millisecond)
+			//time.Sleep(200 * time.Millisecond)
 			masterCred := u.MasterCredSignatureCombine(signature1)
 			RunTime1 += time.Since(startTime).Milliseconds()
 			t.Log(masterCred)
