@@ -1,6 +1,8 @@
 package threshold_signature
 
-import "math/big"
+import (
+	"math/big"
+)
 
 func Verify(x, y *big.Int) bool {
 	fai := new(big.Int).Exp(y, e, n)
