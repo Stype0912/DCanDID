@@ -1,7 +1,7 @@
 package committee
 
 import (
-	"github.com/Stype0912/DCanDID/handler/user"
+	"github.com/Stype0912/DCanDID/service/user"
 	"github.com/consensys/gnark/backend/groth16"
 	"k8s.io/klog"
 )

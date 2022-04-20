@@ -18,7 +18,7 @@ type ProofStruct struct {
 }
 
 type User struct {
-	id    string
+	Id    string
 	Hash  string
 	Claim []*ProofStruct
 	PkU   string

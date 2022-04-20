@@ -1,10 +1,10 @@
-package handler
+package service
 
 import (
-	"github.com/Stype0912/DCanDID/handler/committee"
-	"github.com/Stype0912/DCanDID/handler/oracle"
-	"github.com/Stype0912/DCanDID/handler/user"
-	"github.com/Stype0912/DCanDID/handler/verifier"
+	"github.com/Stype0912/DCanDID/service/committee"
+	"github.com/Stype0912/DCanDID/service/oracle"
+	"github.com/Stype0912/DCanDID/service/user"
+	"github.com/Stype0912/DCanDID/service/verifier"
 	_ "github.com/go-sql-driver/mysql"
 	"math/big"
 	"math/rand"
@@ -41,6 +41,6 @@ func TestPC(t *testing.T) {
 		ctxCred := u.CtxCredIssue(masterCred)
 		v := &verifier.Verifier{}
 		t.Log(v.MasterCredVerify(masterCred))
-		t.Log(v.CtxProofVerify(ctxCred.Proof))
+		t.Log(v.CtxProofVerify(ctxCred))
 	}
 }

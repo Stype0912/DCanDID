@@ -1,4 +1,4 @@
-package action
+package user
 
 import (
 	"crypto/rsa"
@@ -11,7 +11,7 @@ import (
 var UserPublicKey *rsa.PublicKey
 
 func init() {
-	publicKey, err := ioutil.ReadFile("./action/public.pem")
+	publicKey, err := ioutil.ReadFile("./conf/public.pem")
 	block, _ := pem.Decode(publicKey)
 	if block == nil {
 		klog.Error("public rsa key error")

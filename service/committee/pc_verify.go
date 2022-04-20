@@ -3,7 +3,7 @@ package committee
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/Stype0912/DCanDID/handler/user"
+	"github.com/Stype0912/DCanDID/service/user"
 	"github.com/Stype0912/DCanDID/util/threshold_signature"
 	"k8s.io/klog"
 	"math/big"

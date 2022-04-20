@@ -26,7 +26,7 @@ type CtxCred struct {
 }
 
 func (u *User) CtxCredIssue(cred *MasterCred) *CtxCred {
-	proof := CtxCommitment(u.id, "21")
+	proof := CtxCommitment(u.Id, "21")
 	return &CtxCred{
 		PkU:        u.PkU,
 		Ctx:        "Age is over 18",
