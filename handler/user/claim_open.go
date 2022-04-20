@@ -11,7 +11,7 @@ import (
 	"math/big"
 )
 
-type ClaimStruct struct {
+type ProofStruct struct {
 	PublicWitness *Circuit
 	Proof         groth16.Proof
 	VerifyingKey  groth16.VerifyingKey
@@ -20,12 +20,12 @@ type ClaimStruct struct {
 type User struct {
 	id    string
 	Hash  string
-	Claim []*ClaimStruct
+	Claim []*ProofStruct
 	PkU   string
 }
 
 type PC struct {
-	Claim []*ClaimStruct
+	Claim []*ProofStruct
 	PkU   string
 	Pi    *big.Int
 }
@@ -35,7 +35,7 @@ func (u *User) Init() {
 	u.PkU = string(pubByte)
 }
 
-func (u *User) ClaimOpen(id, hash string) []*ClaimStruct {
+func (u *User) ClaimOpen(id, hash string) []*ProofStruct {
 	u.ProofGen(id, hash)
 	return u.Claim
 }
@@ -77,7 +77,7 @@ func (u *User) ProofGen(id, hash string) {
 		klog.Errorf("Proof gen error: %v", err)
 		return
 	}
-	claimStruct := new(ClaimStruct)
+	claimStruct := new(ProofStruct)
 	claimStruct.PublicWitness = publicWitness
 	claimStruct.Proof = proof
 	claimStruct.VerifyingKey = vk

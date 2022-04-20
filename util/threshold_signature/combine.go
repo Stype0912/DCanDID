@@ -7,11 +7,12 @@ import (
 
 func Combine(x *big.Int, X map[int]*big.Int) *big.Int {
 	w := big.NewInt(1)
+	//klog.Info(X)
 	for _, Si := range S {
 		if Si == 0 {
 			continue
 		}
-		//t.Log(Si)
+		//klog.Info(Si)
 		xi2 := new(big.Int).Exp(new(big.Int).Mul(X[Si], X[Si]), lambda[0][Si], n)
 		w = new(big.Int).Mul(w, xi2)
 	}

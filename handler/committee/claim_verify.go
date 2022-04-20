@@ -10,7 +10,7 @@ type Committee struct {
 	id int
 }
 
-func (c *Committee) ClaimVerify(claim []*user.ClaimStruct) bool {
+func (c *Committee) ClaimVerify(claim []*user.ProofStruct) bool {
 	for _, item := range claim {
 		if !c.ProofVerify(item) {
 			klog.Error("Proof verify failed")
@@ -20,7 +20,7 @@ func (c *Committee) ClaimVerify(claim []*user.ClaimStruct) bool {
 	return true
 }
 
-func (c *Committee) ProofVerify(claim *user.ClaimStruct) bool {
+func (c *Committee) ProofVerify(claim *user.ProofStruct) bool {
 	err := groth16.Verify(claim.Proof, claim.VerifyingKey, claim.PublicWitness)
 	if err != nil {
 		return false

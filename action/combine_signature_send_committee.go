@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	dedup "github.com/Stype0912/DCanDID/deduplication"
-	"github.com/Stype0912/DCanDID/handler/committee"
 	"github.com/Stype0912/DCanDID/util"
 	"github.com/Stype0912/DCanDID/util/threshold_signature"
 	"k8s.io/klog"
@@ -181,6 +180,6 @@ func SignM(w http.ResponseWriter, request *http.Request) {
 	}
 	toBeSigned := hex.EncodeToString(marshalledReq)
 	toBeSignedBig, _ := new(big.Int).SetString(toBeSigned, 16)
-	responseInfo.Signature = committee.Sign(toBeSignedBig)
+	responseInfo.Signature = threshold_signature.Sign(toBeSignedBig, 1)
 	return
 }

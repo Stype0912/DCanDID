@@ -39,6 +39,7 @@ func (o *Oracle) GetHashById(id string) (string, error) {
 	}
 	var hash string
 	err = db.QueryRow("SELECT hash FROM oracle_platform WHERE user_id = ?", id).Scan(&hash)
+	db.Close()
 	if err != nil {
 		klog.Errorf("query error: %v", err)
 		//return "", err
@@ -53,6 +54,7 @@ func (o *Oracle) InsertHashById(id, hash string) error {
 		return err
 	}
 	_, err = db.Exec("INSERT INTO oracle_platform (user_id, hash, submission_date) VALUES (?, ?, ?)", id, hash, time.Now().Format("2006-01-02 15:04:05"))
+	db.Close()
 	if err != nil {
 		klog.Errorf("db insert error: %v", err)
 		return err

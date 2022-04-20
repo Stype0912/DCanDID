@@ -89,6 +89,9 @@ func init() {
 	})
 	for i := 0; i <= l; i++ {
 		if counter < k {
+			if lTemp[i] == 0 {
+				continue
+			}
 			counter++
 			S = append(S, lTemp[i])
 		} else {
