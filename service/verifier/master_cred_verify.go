@@ -31,5 +31,6 @@ func (v *Verifier) MasterCredVerify(cred *user.MasterCred) bool {
 	}
 	masterCredInfoNum := hex.EncodeToString(masterCredInfo)
 	masterCredInfoBigNum, _ := new(big.Int).SetString(masterCredInfoNum, 16)
-	return threshold_signature.Verify(masterCredInfoBigNum, cred.Signature)
+	signature, _ := new(big.Int).SetString(cred.Signature, 10)
+	return threshold_signature.Verify(masterCredInfoBigNum, signature)
 }

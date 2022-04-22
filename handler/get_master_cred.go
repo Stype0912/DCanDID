@@ -14,10 +14,14 @@ type UserInfo struct {
 }
 
 func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
-
+	if request.Method != "POST" {
+		w.WriteHeader(405)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
+	request.URL.Query().Get("id")
 	decoder := json.NewDecoder(request.Body)
 
 	var userInfo *UserInfo
@@ -40,8 +44,9 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 	c := &committee.Committee{}
 	for i := 1; i <= 15; i++ {
 		c.Init(i)
-		c.ClaimVerify(claim)
-		signature[i] = c.SignClaim(u)
+		if c.ClaimVerify(claim) {
+			signature[i] = c.SignClaim(u)
+		}
 		//t.Log(c.SignClaim(u))
 	}
 	pc := u.PCSignatureCombine(signature)

@@ -18,11 +18,11 @@ type CtxProofStruct struct {
 }
 
 type CtxCred struct {
-	PkU        string
-	Ctx        string
-	MasterCred *MasterCred
-	Claim      *ProofStruct
-	Proof      *CtxProofStruct
+	PkU        string          `json:"pk_u"`
+	Ctx        string          `json:"ctx"`
+	MasterCred *MasterCred     `json:"master_cred"`
+	Claim      *ProofStruct    `json:"claim"`
+	Proof      *CtxProofStruct `json:"proof"`
 }
 
 func (u *User) CtxCredIssue(cred *MasterCred) *CtxCred {
