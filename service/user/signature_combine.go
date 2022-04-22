@@ -25,11 +25,11 @@ func (u *User) PCSignatureCombine(signature map[int]*big.Int) *PC {
 }
 
 type MasterCred struct {
-	PkU       string
-	Ctx       string
-	Claim     []*ProofStruct
-	DedupOver string
-	Signature *big.Int
+	PkU       string         `json:"pk_u"`
+	Ctx       string         `json:"ctx"`
+	Claim     []*ProofStruct `json:"claim"`
+	DedupOver string         `json:"dedup_over"`
+	Signature string         `json:"signature"`
 }
 
 func (u *User) MasterCredSignatureCombine(signature map[int]*big.Int) *MasterCred {
@@ -57,6 +57,6 @@ func (u *User) MasterCredSignatureCombine(signature map[int]*big.Int) *MasterCre
 		Ctx:       "master",
 		Claim:     u.Claim,
 		DedupOver: "user_id",
-		Signature: Signature,
+		Signature: Signature.String(),
 	}
 }
