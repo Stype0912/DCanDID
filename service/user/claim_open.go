@@ -12,22 +12,22 @@ import (
 )
 
 type ProofStruct struct {
-	PublicWitness *Circuit
-	Proof         groth16.Proof
-	VerifyingKey  groth16.VerifyingKey
+	PublicWitness *Circuit             `json:"public_witness"`
+	Proof         groth16.Proof        `json:"proof"`
+	VerifyingKey  groth16.VerifyingKey `json:"verifying_key"`
 }
 
 type User struct {
-	Id    string
-	Hash  string
-	Claim []*ProofStruct
-	PkU   string
+	Id string `json:"id"`
+	//Hash  string         `json:"hash"`
+	Claim []*ProofStruct `json:"claim"`
+	PkU   string         `json:"pk_u"`
 }
 
 type PC struct {
-	Claim []*ProofStruct
-	PkU   string
-	Pi    *big.Int
+	Claim []*ProofStruct `json:"claim"`
+	PkU   string         `json:"pk_u"`
+	Pi    *big.Int       `json:"pi"`
 }
 
 func (u *User) Init() {

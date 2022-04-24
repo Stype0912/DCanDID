@@ -17,5 +17,6 @@ func (c *Committee) PCVerify(userInfo *user.User, signature *big.Int) bool {
 	}
 	userInfoNum := hex.EncodeToString(userInfoStr)
 	userInfoBigNum, _ := new(big.Int).SetString(userInfoNum, 16)
+	klog.Infof("Verify content: %v", userInfoBigNum.String()[:100])
 	return threshold_signature.Verify(userInfoBigNum, signature)
 }

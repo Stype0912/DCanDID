@@ -10,10 +10,10 @@ import (
 )
 
 func (c *Committee) MasterCredIssue(u *user.User, pc *user.PC) *big.Int {
-	if !c.PCVerify(u, pc.Pi) {
-		klog.Error("Signature illegal")
-		return nil
-	}
+	//if !c.PCVerify(u, pc.Pi) {
+	//	klog.Error("Signature illegal")
+	//	return nil
+	//}
 	m := struct {
 		PkU       string
 		Ctx       string

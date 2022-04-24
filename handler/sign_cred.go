@@ -9,30 +9,23 @@ import (
 	"net/http"
 )
 
-type SignClaimClaimStruct struct {
-	PublicWitness *user.Circuit `json:"public_witness"`
-	Proof         string        `json:"proof"`
-	VerifyingKey  string        `json:"verifying_key"`
+type SignCredReq struct {
+	Id   int                  `json:"id"`
+	Pc   *PCStruct            `json:"pc"`
+	User *SignClaimUserStruct `json:"user"`
 }
 
-type SignClaimUserStruct struct {
-	Id    string                  `json:"id"`
-	Hash  string                  `json:"hash"`
-	Claim []*SignClaimClaimStruct `json:"claim"`
-	PkU   string                  `json:"pk_u"`
-}
-
-type SignClaimReq struct {
-	Id    int                     `json:"id"`
-	Claim []*SignClaimClaimStruct `json:"claim"`
-	User  *SignClaimUserStruct    `json:"user"`
-}
-
-type SignClaimResp struct {
+type SignCredResp struct {
 	Signature *big.Int `json:"signature"`
 }
 
-func SignClaim(w http.ResponseWriter, request *http.Request) {
+type PCStruct struct {
+	Claim []*SignClaimClaimStruct `json:"claim"`
+	PkU   string                  `json:"pk_u"`
+	Pi    *big.Int                `json:"pi"`
+}
+
+func SignMasterCred(w http.ResponseWriter, request *http.Request) {
 	if request.Method != "POST" {
 		w.WriteHeader(405)
 		return
@@ -43,18 +36,18 @@ func SignClaim(w http.ResponseWriter, request *http.Request) {
 
 	decoder := json.NewDecoder(request.Body)
 
-	var req *SignClaimReq
-	resp := &SignClaimResp{}
+	var req *SignCredReq
+	resp := &SignCredResp{}
 
 	defer func() {
 		json.NewEncoder(w).Encode(resp)
 	}()
 
 	_ = decoder.Decode(&req)
-	c := &committee.Committee{}
+	c := committee.Committee{}
 	c.Init(req.Id)
 	oldClaim := make([]*user.ProofStruct, 0)
-	for _, item := range req.Claim {
+	for _, item := range req.User.Claim {
 		proof := util.DecodeString2GrothProof(item.Proof)
 		vk := util.DecodeString2GrothVK(item.VerifyingKey)
 		newClaimTmp := &user.ProofStruct{
@@ -70,7 +63,10 @@ func SignClaim(w http.ResponseWriter, request *http.Request) {
 		Claim: oldClaim,
 		PkU:   req.User.PkU,
 	}
-	if c.ClaimVerify(oldClaim) {
-		resp.Signature = c.SignClaim(oldUser)
+	oldPc := &user.PC{
+		Claim: oldClaim,
+		PkU:   req.Pc.PkU,
+		Pi:    req.Pc.Pi,
 	}
+	resp.Signature = c.MasterCredIssue(oldUser, oldPc)
 }

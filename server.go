@@ -13,5 +13,6 @@ func main() {
 
 	http.HandleFunc("/get-commit", handler.OracleGetCommit)
 	http.HandleFunc("/sign-claim", handler.SignClaim)
+	http.HandleFunc("/sign-cred", handler.SignMasterCred)
 	_ = http.ListenAndServe(":7890", nil)
 }

@@ -15,7 +15,7 @@ import (
 var TestCredMap map[string]*user.MasterCred
 var TestUserMap map[string]*user.User
 var TestUserId []string
-var loop = 10
+var loop = 100
 
 func TestMasterCredParallel(t *testing.T) {
 	TestCredMap = make(map[string]*user.MasterCred)

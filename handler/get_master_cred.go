@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/Stype0912/DCanDID/service/committee"
 	"github.com/Stype0912/DCanDID/service/user"
 	"github.com/Stype0912/DCanDID/util"
 	"k8s.io/klog"
@@ -49,20 +48,56 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 	claim := u.ClaimOpen(u.Id, oracleResp.Claim)
 	signature := make(map[int]*big.Int)
 
-	c := &committee.Committee{}
-	for i := 1; i <= 15; i++ {
-		c.Init(i)
-		if c.ClaimVerify(claim) {
-			signature[i] = c.SignClaim(u)
+	//c := &committee.Committee{}
+	signClaimResp := &SignClaimResp{}
+	newClaim := []*SignClaimClaimStruct{}
+	for _, item := range claim {
+		proof := util.EncodeGrothProof2String(item.Proof)
+		vk := util.EncodeGrothVK2String(item.VerifyingKey)
+		newClaimTmp := &SignClaimClaimStruct{
+			PublicWitness: item.PublicWitness,
+			Proof:         proof,
+			VerifyingKey:  vk,
 		}
+		newClaim = append(newClaim, newClaimTmp)
+	}
+	newUser := &SignClaimUserStruct{
+		Id: u.Id,
+		//Hash:  u.Hash,
+		Claim: newClaim,
+		PkU:   u.PkU,
+	}
+	for i := 1; i <= 15; i++ {
+		err = util.DoHttpPostRequest("http://127.0.0.1:7890/sign-claim", SignClaimReq{
+			Id:    i,
+			Claim: newClaim,
+			User:  newUser,
+		}, &signClaimResp)
+		signature[i] = signClaimResp.Signature
+		//c.Init(i)
+		//if c.ClaimVerify(claim) {
+		//	signature[i] = c.SignClaim(u)
+		//}
 		//t.Log(c.SignClaim(u))
 	}
 	pc := u.PCSignatureCombine(signature)
 
+	newPc := &PCStruct{
+		Claim: newClaim,
+		PkU:   pc.PkU,
+		Pi:    pc.Pi,
+	}
 	signature1 := make(map[int]*big.Int)
+	signCredResp := &SignCredResp{}
 	for i := 1; i <= 15; i++ {
-		c.Init(i)
-		signature1[i] = c.MasterCredIssue(u, pc)
+		//c.Init(i)
+		//signature1[i] = c.MasterCredIssue(u, pc)
+		err = util.DoHttpPostRequest("http://127.0.0.1:7890/sign-cred", SignCredReq{
+			Id:   i,
+			Pc:   newPc,
+			User: newUser,
+		}, &signCredResp)
+		signature1[i] = signCredResp.Signature
 	}
 	masterCred := u.MasterCredSignatureCombine(signature1)
 	responseInfo = masterCred

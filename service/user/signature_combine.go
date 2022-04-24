@@ -9,13 +9,19 @@ import (
 )
 
 func (u *User) PCSignatureCombine(signature map[int]*big.Int) *PC {
-	userInfoStr, err := json.Marshal(u)
+	oldUser := &User{
+		Id:    u.Id,
+		Claim: u.Claim,
+		PkU:   u.PkU,
+	}
+	userInfoStr, err := json.Marshal(oldUser)
 	if err != nil {
 		klog.Errorf("Marshal error: %v", err)
 		return nil
 	}
 	userInfoNum := hex.EncodeToString(userInfoStr)
 	userInfoBigNum, _ := new(big.Int).SetString(userInfoNum, 16)
+	klog.Infof("Combine content: %v", userInfoBigNum.String()[:100])
 	Pi := threshold_signature.Combine(userInfoBigNum, signature)
 	return &PC{
 		Claim: u.Claim,
