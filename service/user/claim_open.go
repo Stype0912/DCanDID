@@ -41,15 +41,21 @@ func (u *User) ClaimOpen(id, hash string) []*ProofStruct {
 }
 
 type Circuit struct {
-	Id   frontend.Variable
-	Hash frontend.Variable `gnark:",public"`
-	Seed *big.Int
+	Id      frontend.Variable
+	Age     frontend.Variable
+	IdHash  frontend.Variable `gnark:",public"`
+	AgeHash frontend.Variable `gnark:",public"`
+	Seed    *big.Int
 }
 
 func (circuit *Circuit) Define(curveID ecc.ID, api frontend.API) error {
-	mimc, _ := mimc.NewMiMC(circuit.Seed.String(), curveID, api)
-	mimc.Write(circuit.Id)
-	api.AssertIsEqual(circuit.Hash, mimc.Sum())
+	mimcId, _ := mimc.NewMiMC(circuit.Seed.String(), curveID, api)
+	mimcId.Write(circuit.Id)
+	api.AssertIsEqual(circuit.IdHash, mimcId.Sum())
+
+	mimcAge, _ := mimc.NewMiMC(circuit.Seed.String(), curveID, api)
+	mimcAge.Write(circuit.Age)
+	api.AssertIsEqual(circuit.AgeHash, mimcAge.Sum())
 	return nil
 }
 
@@ -64,12 +70,15 @@ func (u *User) ProofGen(id, hash string) {
 	pk, vk, err := groth16.Setup(r1cs)
 
 	witness := &Circuit{
-		Id:   TransferStringToElement([]byte(id)),
-		Hash: TransferStringToElement(hash),
+		Id:      TransferStringToElement([]byte(id)),
+		IdHash:  TransferStringToElement(hash),
+		Age:     TransferStringToElement([]byte("21")),
+		AgeHash: TransferStringToElement(mimcHash([]byte("21"))),
 	}
 
 	publicWitness := &Circuit{
-		Hash: TransferStringToElement(hash),
+		IdHash:  TransferStringToElement(hash),
+		AgeHash: TransferStringToElement(mimcHash([]byte("21"))),
 	}
 
 	proof, err := groth16.Prove(r1cs, pk, witness)

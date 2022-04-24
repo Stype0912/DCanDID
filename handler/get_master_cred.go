@@ -3,8 +3,9 @@ package handler
 import (
 	"encoding/json"
 	"github.com/Stype0912/DCanDID/service/committee"
-	"github.com/Stype0912/DCanDID/service/oracle"
 	"github.com/Stype0912/DCanDID/service/user"
+	"github.com/Stype0912/DCanDID/util"
+	"k8s.io/klog"
 	"math/big"
 	"net/http"
 )
@@ -21,7 +22,7 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	request.URL.Query().Get("id")
+
 	decoder := json.NewDecoder(request.Body)
 
 	var userInfo *UserInfo
@@ -36,11 +37,18 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 	u.Init()
 	u.Id = userInfo.Id
 
-	o := &oracle.Oracle{}
-	hash := o.ClaimGen(u.Id)
+	oracleResp := &OracleResp{}
+	err := util.DoHttpPostRequest("http://127.0.0.1:7890/get-commit", userInfo, &oracleResp)
+	//o := &oracle.Oracle{}
+	//hash := o.ClaimGen(u.Id)
+	if err != nil {
+		klog.Errorf("Get commit err:%v", err)
+		return
+	}
 
-	claim := u.ClaimOpen(u.Id, hash)
+	claim := u.ClaimOpen(u.Id, oracleResp.Claim)
 	signature := make(map[int]*big.Int)
+
 	c := &committee.Committee{}
 	for i := 1; i <= 15; i++ {
 		c.Init(i)
