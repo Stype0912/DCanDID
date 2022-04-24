@@ -2,12 +2,13 @@ package threshold_signature
 
 import (
 	"github.com/Stype0912/DCanDID/util"
+	"k8s.io/klog"
 	"math/big"
 )
 
 func Combine(x *big.Int, X map[int]*big.Int) *big.Int {
 	w := big.NewInt(1)
-	//klog.Info(X)
+	klog.Info(X)
 	for _, Si := range S {
 		if Si == 0 {
 			continue

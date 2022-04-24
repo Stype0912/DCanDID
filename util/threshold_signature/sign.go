@@ -13,7 +13,7 @@ func Sign(x *big.Int, id int) map[int]*big.Int {
 	//t.Log(x)
 
 	X := make(map[int]*big.Int)
-	for i := id; i <= id; i++ {
+	for i := 1; i <= l; i++ {
 		X[i] = new(big.Int).Exp(x, new(big.Int).Mul(new(big.Int).Mul(big.NewInt(2), Delta), s[i]), n)
 		//t.Log(X[i])
 	}
@@ -24,7 +24,7 @@ func Sign(x *big.Int, id int) map[int]*big.Int {
 	r := new(big.Int).Rand(rand.New(rand.NewSource(time.Now().Unix())), new(big.Int).Exp(big.NewInt(2), new(big.Int).Add(big.NewInt(int64(Ln)), big.NewInt(int64(2*L1))), n))
 	v_hat := new(big.Int).Exp(v, r, n)
 	x_hat := new(big.Int).Exp(x_wave, r, n)
-	for i := id; i <= id; i++ {
+	for i := 1; i <= l; i++ {
 		vStr := v.String()
 		xWaveStr := x_wave.String()
 		viStr := VK[i].String()

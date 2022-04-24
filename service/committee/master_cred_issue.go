@@ -10,6 +10,7 @@ import (
 )
 
 func (c *Committee) MasterCredIssue(u *user.User, pc *user.PC) *big.Int {
+	klog.Info(pc.Pi)
 	if !c.PCVerify(u, pc.Pi) {
 		klog.Error("Signature illegal")
 		return nil

@@ -7,9 +7,9 @@ import (
 	"net/http"
 )
 
-func DoHttpGetRequest(url string, req interface{}, resp interface{}) (err error) {
+func DoHttpPostRequest(url string, req interface{}, resp interface{}) (err error) {
 	jsonStr, _ := json.Marshal(req)
-	request, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
+	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	request.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	response, err := client.Do(request)
