@@ -22,7 +22,7 @@ type SignCredResp struct {
 type PCStruct struct {
 	Claim []*SignClaimClaimStruct `json:"claim"`
 	PkU   string                  `json:"pk_u"`
-	Pi    *big.Int                `json:"pi"`
+	Pi    string                  `json:"pi"`
 }
 
 func SignMasterCred(w http.ResponseWriter, request *http.Request) {
@@ -63,10 +63,11 @@ func SignMasterCred(w http.ResponseWriter, request *http.Request) {
 		Claim: oldClaim,
 		PkU:   req.User.PkU,
 	}
+	pi, _ := new(big.Int).SetString(req.Pc.Pi, 10)
 	oldPc := &user.PC{
 		Claim: oldClaim,
 		PkU:   req.Pc.PkU,
-		Pi:    req.Pc.Pi,
+		Pi:    pi,
 	}
 	resp.Signature = c.MasterCredIssue(oldUser, oldPc)
 }

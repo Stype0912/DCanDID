@@ -46,7 +46,7 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 	}
 
 	claim := u.ClaimOpen(u.Id, oracleResp.Claim)
-	signature := make(map[int]*big.Int)
+	signature := make(map[int]*big.Int, 0)
 
 	//c := &committee.Committee{}
 	signClaimResp := &SignClaimResp{}
@@ -73,19 +73,21 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 			Claim: newClaim,
 			User:  newUser,
 		}, &signClaimResp)
-		signature[i] = signClaimResp.Signature
+		signature[i], _ = new(big.Int).SetString(signClaimResp.Signature.String(), 10)
 		//c.Init(i)
 		//if c.ClaimVerify(claim) {
 		//	signature[i] = c.SignClaim(u)
 		//}
 		//t.Log(c.SignClaim(u))
 	}
+	klog.Info(signature)
 	pc := u.PCSignatureCombine(signature)
+	klog.Info(pc.Pi)
 
 	newPc := &PCStruct{
 		Claim: newClaim,
 		PkU:   pc.PkU,
-		Pi:    pc.Pi,
+		Pi:    pc.Pi.String(),
 	}
 	signature1 := make(map[int]*big.Int)
 	signCredResp := &SignCredResp{}
@@ -97,7 +99,7 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 			Pc:   newPc,
 			User: newUser,
 		}, &signCredResp)
-		signature1[i] = signCredResp.Signature
+		signature1[i], _ = new(big.Int).SetString(signCredResp.Signature.String(), 10)
 	}
 	masterCred := u.MasterCredSignatureCombine(signature1)
 	responseInfo = masterCred
