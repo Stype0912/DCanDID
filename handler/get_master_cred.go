@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/Stype0912/DCanDID/service/user"
 	"github.com/Stype0912/DCanDID/util"
+	"io/ioutil"
 	"k8s.io/klog"
 	"math/big"
 	"net/http"
@@ -11,6 +12,14 @@ import (
 
 type UserInfo struct {
 	Id string `json:"id"`
+}
+
+type CachedMasterCred struct {
+	PkU       string                  `json:"pk_u"`
+	Ctx       string                  `json:"ctx"`
+	Claim     []*SignClaimClaimStruct `json:"claim"`
+	DedupOver string                  `json:"dedup_over"`
+	Signature string                  `json:"signature"`
 }
 
 func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
@@ -50,7 +59,7 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 
 	//c := &committee.Committee{}
 	signClaimResp := &SignClaimResp{}
-	newClaim := []*SignClaimClaimStruct{}
+	newClaim := make([]*SignClaimClaimStruct, 0)
 	for _, item := range claim {
 		proof := util.EncodeGrothProof2String(item.Proof)
 		vk := util.EncodeGrothVK2String(item.VerifyingKey)
@@ -102,5 +111,17 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 		signature1[i], _ = new(big.Int).SetString(signCredResp.Signature.String(), 10)
 	}
 	masterCred := u.MasterCredSignatureCombine(signature1)
+	cachedMasterCred := &CachedMasterCred{
+		PkU:       masterCred.PkU,
+		Ctx:       masterCred.Ctx,
+		Claim:     newClaim,
+		DedupOver: masterCred.DedupOver,
+		Signature: masterCred.Signature,
+	}
+	fileName := "./cred/" + userInfo.Id
+	fileContent, _ := json.Marshal(cachedMasterCred)
+	if err = ioutil.WriteFile(fileName, fileContent, 0666); err != nil {
+		klog.Errorf("Write file error: %v", err)
+	}
 	responseInfo = masterCred
 }
