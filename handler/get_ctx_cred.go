@@ -5,12 +5,14 @@ import (
 	"github.com/Stype0912/DCanDID/service/committee"
 	"github.com/Stype0912/DCanDID/service/oracle"
 	"github.com/Stype0912/DCanDID/service/user"
+	"github.com/Stype0912/DCanDID/util"
+	"io/ioutil"
+	"k8s.io/klog"
 	"math/big"
 	"net/http"
 )
 
 func UserGetCtxCred(w http.ResponseWriter, request *http.Request) {
-
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
@@ -27,6 +29,40 @@ func UserGetCtxCred(w http.ResponseWriter, request *http.Request) {
 	u := &user.User{}
 	u.Init()
 	u.Id = userInfo.Id
+
+	fileName := "./cred/" + userInfo.Id
+	fileContent, err := ioutil.ReadFile(fileName)
+	if err == nil {
+		var cachedMasterCred *CachedMasterCred
+		err := json.Unmarshal(fileContent, &cachedMasterCred)
+		if err != nil {
+			klog.Errorf("Json unmarshal error: %v", err)
+			return
+		}
+		oldClaim := make([]*user.ProofStruct, 0)
+		for _, item := range cachedMasterCred.Claim {
+			proof := util.DecodeString2GrothProof(item.Proof)
+			vk := util.DecodeString2GrothVK(item.VerifyingKey)
+			newClaimTmp := &user.ProofStruct{
+				PublicWitness: item.PublicWitness,
+				Proof:         proof,
+				VerifyingKey:  vk,
+			}
+			oldClaim = append(oldClaim, newClaimTmp)
+		}
+		u.Claim = oldClaim
+		masterCred := &user.MasterCred{
+			PkU:       cachedMasterCred.PkU,
+			Ctx:       cachedMasterCred.Ctx,
+			Claim:     oldClaim,
+			DedupOver: cachedMasterCred.DedupOver,
+			Signature: cachedMasterCred.Signature,
+		}
+		ctxCred := u.CtxCredIssue(masterCred)
+		responseInfo = ctxCred
+		klog.Info("新流程")
+		return
+	}
 
 	o := &oracle.Oracle{}
 	hash := o.ClaimGen(u.Id)
