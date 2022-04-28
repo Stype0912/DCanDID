@@ -10,7 +10,7 @@ var p, q, p_hat, q_hat, n, m, e, d *big.Int
 var Delta, v *big.Int
 
 // 节点数
-var l int = 15
+var L int = 15
 
 // 门限值
 var k = 7
