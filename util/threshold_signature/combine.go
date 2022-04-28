@@ -13,7 +13,7 @@ func Combine(x *big.Int, X map[int]*big.Int) *big.Int {
 		if Si == 0 {
 			continue
 		}
-		//klog.Info(Si)
+		klog.Info(Si)
 		xi2 := new(big.Int).Exp(new(big.Int).Mul(X[Si], X[Si]), lambda[0][Si], n)
 		w = new(big.Int).Mul(w, xi2)
 	}

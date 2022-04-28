@@ -6,6 +6,7 @@ import (
 	"github.com/Stype0912/DCanDID/service/oracle"
 	"github.com/Stype0912/DCanDID/service/user"
 	"github.com/Stype0912/DCanDID/service/verifier"
+	"github.com/Stype0912/DCanDID/util/threshold_signature"
 	"k8s.io/klog"
 	"math/big"
 	"net/http"
@@ -40,7 +41,7 @@ func VerifierCheckCred(w http.ResponseWriter, request *http.Request) {
 	claim := u.ClaimOpen(u.Id, hash)
 	signature := make(map[int]*big.Int)
 	c := &committee.Committee{}
-	for i := 1; i <= 15; i++ {
+	for i := 1; i <= threshold_signature.L; i++ {
 		c.Init(i)
 		c.ClaimVerify(claim)
 		signature[i] = c.SignClaim(u)
@@ -49,7 +50,7 @@ func VerifierCheckCred(w http.ResponseWriter, request *http.Request) {
 	pc := u.PCSignatureCombine(signature)
 
 	signature1 := make(map[int]*big.Int)
-	for i := 1; i <= 15; i++ {
+	for i := 1; i <= threshold_signature.L; i++ {
 		c.Init(i)
 		signature1[i] = c.MasterCredIssue(u, pc)
 	}

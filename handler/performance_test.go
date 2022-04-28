@@ -6,9 +6,10 @@ import (
 	"math/rand"
 	"sync"
 	"testing"
+	"time"
 )
 
-var loop = 100
+var loop = 10
 var UserId []string
 
 func TestMasterCredParallel(t *testing.T) {
@@ -16,26 +17,34 @@ func TestMasterCredParallel(t *testing.T) {
 	UserId = []string{}
 	var wg sync.WaitGroup
 	//goroutine
-	ch := make(chan bool, loop)
+	//ch := make(chan bool, loop)
+	var lock sync.Mutex
+	timeDuration := int64(0)
 	for j := 1; j <= loop; j++ {
 		wg.Add(1)
-		ch <- true
+		//ch <- true
 		go func() {
 			defer wg.Done()
 			url := "http://127.0.0.1:7890/master-cred"
 			id := big.NewInt(rand.Int63n(1000000000000)).String()
+			lock.Lock()
 			UserId = append(UserId, id)
+			lock.Unlock()
 			req := struct {
 				Id string `json:"id"`
 			}{
 				id,
 			}
+			time1 := time.Now()
 			util.DoHttpPostRequest(url, req, &struct{}{})
-			<-ch
+			timeDuration += time.Since(time1).Milliseconds()
+			t.Log(time.Since(time1).Milliseconds())
+			//<-ch
 		}()
 	}
 	wg.Wait()
 	t.Log(len(UserId))
+	t.Log(timeDuration / int64(len(UserId)))
 }
 
 func TestCtxCredParallel(t *testing.T) {
@@ -43,24 +52,27 @@ func TestCtxCredParallel(t *testing.T) {
 	t.Log(len(UserId))
 	url := "http://127.0.0.1:7890/ctx-cred"
 	var wg sync.WaitGroup
-	//goroutine
-	ch := make(chan bool, loop)
+	timeDuration := int64(0)
 	for _, id := range UserId {
 		wg.Add(1)
 		go func(id string) {
 			defer wg.Done()
-			ch <- true
+			//ch <- true
 			//id := big.NewInt(rand.Int63n(1000000000000)).String()
 			req := struct {
 				Id string `json:"id"`
 			}{
 				id,
 			}
+			time1 := time.Now()
 			util.DoHttpPostRequest(url, req, &struct{}{})
-			<-ch
+			timeDuration += time.Since(time1).Milliseconds()
+			t.Log(time.Since(time1).Milliseconds())
+			//<-ch
 		}(id)
 	}
 	wg.Wait()
+	t.Log(timeDuration / int64(len(UserId)))
 }
 
 func TestMasterCredOrder(t *testing.T) {
