@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/Stype0912/DCanDID/service/user"
 	"github.com/Stype0912/DCanDID/util"
+	"github.com/Stype0912/DCanDID/util/threshold_signature"
 	"io/ioutil"
 	"k8s.io/klog"
 	"math/big"
@@ -76,7 +77,7 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 		Claim: newClaim,
 		PkU:   u.PkU,
 	}
-	for i := 1; i <= 15; i++ {
+	for i := 1; i <= threshold_signature.L; i++ {
 		err = util.DoHttpPostRequest("http://127.0.0.1:7890/sign-claim", SignClaimReq{
 			Id:    i,
 			Claim: newClaim,
@@ -100,7 +101,7 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 	}
 	signature1 := make(map[int]*big.Int)
 	signCredResp := &SignCredResp{}
-	for i := 1; i <= 15; i++ {
+	for i := 1; i <= threshold_signature.L; i++ {
 		//c.Init(i)
 		//signature1[i] = c.MasterCredIssue(u, pc)
 		err = util.DoHttpPostRequest("http://127.0.0.1:7890/sign-cred", SignCredReq{

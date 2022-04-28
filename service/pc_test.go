@@ -4,6 +4,7 @@ import (
 	"github.com/Stype0912/DCanDID/service/committee"
 	"github.com/Stype0912/DCanDID/service/oracle"
 	"github.com/Stype0912/DCanDID/service/user"
+	"github.com/Stype0912/DCanDID/util/threshold_signature"
 	_ "github.com/go-sql-driver/mysql"
 	"math/big"
 	"math/rand"
@@ -40,7 +41,7 @@ func TestMasterCredParallel(t *testing.T) {
 			claim := u.ClaimOpen(id, hash)
 			signature := make(map[int]*big.Int)
 			c := &committee.Committee{}
-			for i := 1; i <= 15; i++ {
+			for i := 1; i <= threshold_signature.L; i++ {
 				c.Init(i)
 				c.ClaimVerify(claim)
 				signature[i] = c.SignClaim(u)
@@ -53,7 +54,7 @@ func TestMasterCredParallel(t *testing.T) {
 			t.Log(c.PCVerify(u, pc.Pi))
 
 			signature1 := make(map[int]*big.Int)
-			for i := 1; i <= 15; i++ {
+			for i := 1; i <= threshold_signature.L; i++ {
 				c.Init(i)
 				signature1[i] = c.MasterCredIssue(u, pc)
 			}
@@ -112,7 +113,7 @@ func TestMasterCredOrder(t *testing.T) {
 		claim := u.ClaimOpen(id, hash)
 		signature := make(map[int]*big.Int)
 		c := &committee.Committee{}
-		for i := 1; i <= 15; i++ {
+		for i := 1; i <= threshold_signature.L; i++ {
 			c.Init(i)
 			c.ClaimVerify(claim)
 			signature[i] = c.SignClaim(u)
@@ -124,7 +125,7 @@ func TestMasterCredOrder(t *testing.T) {
 		t.Log(c.PCVerify(u, pc.Pi))
 
 		signature1 := make(map[int]*big.Int)
-		for i := 1; i <= 15; i++ {
+		for i := 1; i <= threshold_signature.L; i++ {
 			c.Init(i)
 			signature1[i] = c.MasterCredIssue(u, pc)
 		}

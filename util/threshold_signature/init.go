@@ -49,7 +49,7 @@ func init() {
 	q_hat, _ = new(big.Int).SetString("97644207449", 10)
 	n, _ = new(big.Int).SetString("38088155963987848448833", 10)
 	m, _ = new(big.Int).SetString("9522038990899381156117", 10)
-	e = big.NewInt(17)
+	e = big.NewInt(65537)
 	d = new(big.Int).ModInverse(e, m)
 	//fmt.Println(p.ProbablyPrime(10), q.ProbablyPrime(10), p_hat.ProbablyPrime(10), q_hat.ProbablyPrime(10))
 	//n = new(big.Int).Mul(p, q)
@@ -63,7 +63,7 @@ func init() {
 	}
 
 	s = make(map[int]*big.Int)
-	for i := 0; i <= l; i++ {
+	for i := 0; i <= L; i++ {
 		s[i] = new(big.Int).Mod(f(i), m)
 		//fmt.Printf("s[%v]: %v", i, s[i])
 	}
@@ -71,23 +71,23 @@ func init() {
 	sqrtN := new(big.Int).Sub(new(big.Int).Sqrt(n), big.NewInt(5))
 	v = new(big.Int).Mul(sqrtN, sqrtN)
 	VK = make(map[int]*big.Int)
-	for i := 1; i <= l; i++ {
+	for i := 1; i <= L; i++ {
 		VK[i] = new(big.Int).Exp(v, s[i], n)
 	}
 
-	Delta = factorial(big.NewInt(int64(l)))
+	Delta = factorial(big.NewInt(int64(L)))
 
 	counter := 0
 
 	var lTemp []int
-	for i := 0; i <= l; i++ {
+	for i := 0; i <= L; i++ {
 		lTemp = append(lTemp, i)
 	}
 
 	rand.Shuffle(len(lTemp), func(i, j int) {
 		lTemp[i], lTemp[j] = lTemp[j], lTemp[i]
 	})
-	for i := 0; i <= l; i++ {
+	for i := 0; i <= L; i++ {
 		if counter < k {
 			if lTemp[i] == 0 {
 				continue
