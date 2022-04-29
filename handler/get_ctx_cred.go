@@ -19,7 +19,7 @@ func UserGetCtxCred(w http.ResponseWriter, request *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	decoder := json.NewDecoder(request.Body)
 
-	var userInfo *UserInfo
+	var userInfo *user.MasterCred
 	var responseInfo *user.CtxCred
 
 	defer func() {
@@ -54,6 +54,7 @@ func UserGetCtxCred(w http.ResponseWriter, request *http.Request) {
 		}
 		u.Claim = oldClaim
 		masterCred := &user.MasterCred{
+			Id:        cachedMasterCred.Id,
 			PkU:       cachedMasterCred.PkU,
 			Ctx:       cachedMasterCred.Ctx,
 			Claim:     oldClaim,

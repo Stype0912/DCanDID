@@ -16,6 +16,7 @@ type UserInfo struct {
 }
 
 type CachedMasterCred struct {
+	Id        string                  `json:"id"`
 	PkU       string                  `json:"pk_u"`
 	Ctx       string                  `json:"ctx"`
 	Claim     []*SignClaimClaimStruct `json:"claim"`
@@ -72,10 +73,10 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 		newClaim = append(newClaim, newClaimTmp)
 	}
 	newUser := &SignClaimUserStruct{
-		Id: u.Id,
-		//Hash:  u.Hash,
-		Claim: newClaim,
-		PkU:   u.PkU,
+		Id:       u.Id,
+		PublicId: u.PublicId,
+		Claim:    newClaim,
+		PkU:      u.PkU,
 	}
 	for i := 1; i <= threshold_signature.L; i++ {
 		err = util.DoHttpPostRequest("http://127.0.0.1:7890/sign-claim", SignClaimReq{
@@ -113,13 +114,14 @@ func UserGetMasterCred(w http.ResponseWriter, request *http.Request) {
 	}
 	masterCred := u.MasterCredSignatureCombine(signature1)
 	cachedMasterCred := &CachedMasterCred{
+		Id:        masterCred.Id,
 		PkU:       masterCred.PkU,
 		Ctx:       masterCred.Ctx,
 		Claim:     newClaim,
 		DedupOver: masterCred.DedupOver,
 		Signature: masterCred.Signature,
 	}
-	fileName := "./cred/" + userInfo.Id
+	fileName := "./cred/" + cachedMasterCred.Id
 	fileContent, _ := json.Marshal(cachedMasterCred)
 	if err = ioutil.WriteFile(fileName, fileContent, 0666); err != nil {
 		klog.Errorf("Write file error: %v", err)

@@ -1,23 +1,40 @@
 package user
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/Stype0912/DCanDID/util"
 	"github.com/consensys/gnark-crypto/ecc"
 	bn254 "github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/groth16"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/hash/mimc"
+	"io/ioutil"
+	"k8s.io/klog"
 	"math/big"
 )
 
+type CachedClaimStruct struct {
+	PublicWitness *Circuit `json:"public_witness"`
+	Proof         string   `json:"proof"`
+	VerifyingKey  string   `json:"verifying_key"`
+}
+
+type CachedCtxProofStruct struct {
+	PublicWitness *ContextCircuit `json:"public_witness"`
+	Proof         string          `json:"proof"`
+	VerifyingKey  string          `json:"verifying_key"`
+}
+
 type CtxProofStruct struct {
-	PublicWitness *ContextCircuit
-	Proof         groth16.Proof
-	VerifyingKey  groth16.VerifyingKey
+	PublicWitness *ContextCircuit      `json:"public_witness"`
+	Proof         groth16.Proof        `json:"proof"`
+	VerifyingKey  groth16.VerifyingKey `json:"verifying_key"`
 }
 
 type CtxCred struct {
+	Id         string          `json:"id"`
 	PkU        string          `json:"pk_u"`
 	Ctx        string          `json:"ctx"`
 	MasterCred *MasterCred     `json:"master_cred"`
@@ -25,15 +42,78 @@ type CtxCred struct {
 	Proof      *CtxProofStruct `json:"proof"`
 }
 
+type CachedMasterCred struct {
+	Id        string               `json:"id"`
+	PkU       string               `json:"pk_u"`
+	Ctx       string               `json:"ctx"`
+	Claim     []*CachedClaimStruct `json:"claim"`
+	DedupOver string               `json:"dedup_over"`
+	Signature string               `json:"signature"`
+}
+
+type CachedCtxCred struct {
+	Id         string                `json:"id"`
+	PkU        string                `json:"pk_u"`
+	Ctx        string                `json:"ctx"`
+	MasterCred *CachedMasterCred     `json:"master_cred"`
+	Claim      *CachedClaimStruct    `json:"claim"`
+	Proof      *CachedCtxProofStruct `json:"proof"`
+}
+
 func (u *User) CtxCredIssue(cred *MasterCred) *CtxCred {
 	proof := CtxCommitment(u.Id, "21")
-	return &CtxCred{
+	ctxCred := &CtxCred{
+		Id:         cred.Id + "_ctx_1",
 		PkU:        u.PkU,
 		Ctx:        "Age is over 18",
 		MasterCred: cred,
 		Claim:      u.Claim[0],
 		Proof:      proof,
 	}
+
+	newMasterClaim := make([]*CachedClaimStruct, 0)
+	for _, item := range cred.Claim {
+		proofTmp := util.EncodeGrothProof2String(item.Proof)
+		vk := util.EncodeGrothVK2String(item.VerifyingKey)
+		newClaimTmp := &CachedClaimStruct{
+			PublicWitness: item.PublicWitness,
+			Proof:         proofTmp,
+			VerifyingKey:  vk,
+		}
+		newMasterClaim = append(newMasterClaim, newClaimTmp)
+	}
+
+	cachedMasterCred := &CachedMasterCred{
+		Id:        cred.Id,
+		PkU:       cred.PkU,
+		Ctx:       cred.Ctx,
+		Claim:     newMasterClaim,
+		DedupOver: cred.DedupOver,
+		Signature: cred.Signature,
+	}
+
+	cachedCtxCred := &CachedCtxCred{
+		Id:         ctxCred.Id,
+		PkU:        ctxCred.PkU,
+		Ctx:        ctxCred.Ctx,
+		MasterCred: cachedMasterCred,
+		Claim: &CachedClaimStruct{
+			PublicWitness: ctxCred.Claim.PublicWitness,
+			Proof:         util.EncodeGrothProof2String(ctxCred.Claim.Proof),
+			VerifyingKey:  util.EncodeGrothVK2String(ctxCred.Claim.VerifyingKey),
+		},
+		Proof: &CachedCtxProofStruct{
+			PublicWitness: ctxCred.Proof.PublicWitness,
+			Proof:         util.EncodeGrothProof2String(ctxCred.Proof.Proof),
+			VerifyingKey:  util.EncodeGrothVK2String(ctxCred.Proof.VerifyingKey),
+		},
+	}
+	fileName := "./cred/" + cachedCtxCred.Id
+	fileContent, _ := json.Marshal(cachedCtxCred)
+	if err := ioutil.WriteFile(fileName, fileContent, 0666); err != nil {
+		klog.Errorf("Write file error: %v", err)
+	}
+	return ctxCred
 }
 
 type ContextCircuit struct {

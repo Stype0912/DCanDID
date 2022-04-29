@@ -14,11 +14,13 @@ type Verifier struct {
 
 func (v *Verifier) MasterCredVerify(cred *user.MasterCred) bool {
 	m := struct {
+		Id        string
 		PkU       string
 		Ctx       string
 		Claim     []*user.ProofStruct
 		DedupOver string
 	}{
+		Id:        cred.Id,
 		PkU:       cred.PkU,
 		Ctx:       "master",
 		Claim:     cred.Claim,
