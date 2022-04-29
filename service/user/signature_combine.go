@@ -10,9 +10,10 @@ import (
 
 func (u *User) PCSignatureCombine(signature map[int]*big.Int) *PC {
 	oldUser := &User{
-		Id:    u.Id,
-		Claim: u.Claim,
-		PkU:   u.PkU,
+		Id:       u.Id,
+		PublicId: u.PublicId,
+		Claim:    u.Claim,
+		PkU:      u.PkU,
 	}
 	userInfoStr, err := json.Marshal(oldUser)
 	if err != nil {
@@ -31,6 +32,7 @@ func (u *User) PCSignatureCombine(signature map[int]*big.Int) *PC {
 }
 
 type MasterCred struct {
+	Id        string         `json:"id"`
 	PkU       string         `json:"pk_u"`
 	Ctx       string         `json:"ctx"`
 	Claim     []*ProofStruct `json:"claim"`
@@ -40,11 +42,13 @@ type MasterCred struct {
 
 func (u *User) MasterCredSignatureCombine(signature map[int]*big.Int) *MasterCred {
 	m := struct {
+		Id        string
 		PkU       string
 		Ctx       string
 		Claim     []*ProofStruct
 		DedupOver string
 	}{
+		Id:        u.PublicId,
 		PkU:       u.PkU,
 		Ctx:       "master",
 		Claim:     u.Claim,
@@ -59,6 +63,7 @@ func (u *User) MasterCredSignatureCombine(signature map[int]*big.Int) *MasterCre
 	masterCredInfoBigNum, _ := new(big.Int).SetString(masterCredInfoNum, 16)
 	Signature := threshold_signature.Combine(masterCredInfoBigNum, signature)
 	return &MasterCred{
+		Id:        u.PublicId,
 		PkU:       u.PkU,
 		Ctx:       "master",
 		Claim:     u.Claim,

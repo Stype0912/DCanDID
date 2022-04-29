@@ -16,10 +16,11 @@ type SignClaimClaimStruct struct {
 }
 
 type SignClaimUserStruct struct {
-	Id    string                  `json:"id"`
-	Hash  string                  `json:"hash"`
-	Claim []*SignClaimClaimStruct `json:"claim"`
-	PkU   string                  `json:"pk_u"`
+	Id       string                  `json:"id"`
+	PublicId string                  `json:"public_id"`
+	Hash     string                  `json:"hash"`
+	Claim    []*SignClaimClaimStruct `json:"claim"`
+	PkU      string                  `json:"pk_u"`
 }
 
 type SignClaimReq struct {
@@ -65,10 +66,10 @@ func SignClaim(w http.ResponseWriter, request *http.Request) {
 		oldClaim = append(oldClaim, newClaimTmp)
 	}
 	oldUser := &user.User{
-		Id: req.User.Id,
-		//Hash:  req.User.Hash,
-		Claim: oldClaim,
-		PkU:   req.User.PkU,
+		Id:       req.User.Id,
+		PublicId: req.User.PublicId,
+		Claim:    oldClaim,
+		PkU:      req.User.PkU,
 	}
 	if c.ClaimVerify(oldClaim) {
 		resp.Signature = c.SignClaim(oldUser)

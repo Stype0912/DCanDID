@@ -4,6 +4,7 @@ import (
 	"github.com/Stype0912/DCanDID/service/committee"
 	"github.com/Stype0912/DCanDID/service/oracle"
 	"github.com/Stype0912/DCanDID/service/user"
+	"github.com/Stype0912/DCanDID/service/verifier"
 	"github.com/Stype0912/DCanDID/util/threshold_signature"
 	_ "github.com/go-sql-driver/mysql"
 	"math/big"
@@ -16,7 +17,7 @@ import (
 var TestCredMap map[string]*user.MasterCred
 var TestUserMap map[string]*user.User
 var TestUserId []string
-var loop = 100
+var loop = 1
 
 func TestMasterCredParallel(t *testing.T) {
 	TestCredMap = make(map[string]*user.MasterCred)
@@ -65,8 +66,8 @@ func TestMasterCredParallel(t *testing.T) {
 			RunTime1 += time.Since(startTime).Milliseconds()
 			t.Log(masterCred)
 
-			//v := &verifier.Verifier{}
-			//t.Log(v.MasterCredVerify(masterCred))
+			v := &verifier.Verifier{}
+			t.Log(v.MasterCredVerify(masterCred))
 			//t.Log(v.CtxProofVerify(ctxCred))
 		}()
 	}

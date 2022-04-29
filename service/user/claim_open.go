@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark/backend"
@@ -9,6 +10,8 @@ import (
 	"github.com/consensys/gnark/std/hash/mimc"
 	"k8s.io/klog"
 	"math/big"
+	"math/rand"
+	"strconv"
 )
 
 type ProofStruct struct {
@@ -18,7 +21,8 @@ type ProofStruct struct {
 }
 
 type User struct {
-	Id string `json:"id"`
+	Id       string `json:"id"`
+	PublicId string `json:"public_id"`
 	//Hash  string         `json:"hash"`
 	Claim []*ProofStruct `json:"claim"`
 	PkU   string         `json:"pk_u"`
@@ -33,6 +37,7 @@ type PC struct {
 func (u *User) Init() {
 	pubByte, _ := json.Marshal(UserPublicKey)
 	u.PkU = string(pubByte)
+	u.PublicId = hex.EncodeToString([]byte(strconv.FormatInt(rand.Int63n(10000000000), 10)))
 }
 
 func (u *User) ClaimOpen(id, hash string) []*ProofStruct {

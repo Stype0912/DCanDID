@@ -16,11 +16,13 @@ func (c *Committee) MasterCredIssue(u *user.User, pc *user.PC) *big.Int {
 		return nil
 	}
 	m := struct {
+		Id        string
 		PkU       string
 		Ctx       string
 		Claim     []*user.ProofStruct
 		DedupOver string
 	}{
+		Id:        u.PublicId,
 		PkU:       u.PkU,
 		Ctx:       "master",
 		Claim:     u.Claim,

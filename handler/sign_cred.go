@@ -58,10 +58,10 @@ func SignMasterCred(w http.ResponseWriter, request *http.Request) {
 		oldClaim = append(oldClaim, newClaimTmp)
 	}
 	oldUser := &user.User{
-		Id: req.User.Id,
-		//Hash:  req.User.Hash,
-		Claim: oldClaim,
-		PkU:   req.User.PkU,
+		Id:       req.User.Id,
+		PublicId: req.User.PublicId,
+		Claim:    oldClaim,
+		PkU:      req.User.PkU,
 	}
 	pi, _ := new(big.Int).SetString(req.Pc.Pi, 10)
 	oldPc := &user.PC{
